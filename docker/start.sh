@@ -13,5 +13,7 @@ php artisan view:cache
 
 echo "RuangBaca: listening on 0.0.0.0:${PORT} (php -S, not artisan serve)"
 
-exec php -S "0.0.0.0:${PORT}" -t public \
-    vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
+# Laravel's server.php uses getcwd() as the public path (same as artisan serve).
+cd public
+exec php -S "0.0.0.0:${PORT}" \
+    ../vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php
