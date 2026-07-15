@@ -43,7 +43,7 @@ Lalu **Redeploy**.
 
 1. `https://…/build/manifest.json` → JSON 200
 2. Hard refresh → CSS/JS 200 di Network tab
-3. Log start: migrate + `artisan serve` jalan
+3. Log start: migrate + `php -S` (bukan `artisan serve`) jalan
 
 ## Local (opsional)
 
