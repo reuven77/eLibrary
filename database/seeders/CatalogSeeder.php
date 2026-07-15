@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Author;
 use App\Models\Book;
 use App\Models\Category;
-use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -20,10 +19,10 @@ class CatalogSeeder extends Seeder
             ['name' => 'Teknologi', 'slug' => 'teknologi', 'dewey' => '004'],
             ['name' => 'Anak', 'slug' => 'anak', 'dewey' => '028'],
         ])->mapWithKeys(function (array $item) {
-            $category = Category::query()->create([
-                'name' => $item['name'],
-                'slug' => $item['slug'],
-            ]);
+            $category = Category::query()->firstOrCreate(
+                ['slug' => $item['slug']],
+                ['name' => $item['name']],
+            );
 
             return [$item['slug'] => ['model' => $category, 'dewey' => $item['dewey']]];
         });
@@ -40,7 +39,10 @@ class CatalogSeeder extends Seeder
             ['name' => 'Walter Isaacson', 'bio' => 'Penulis biografi tokoh teknologi dan sains.'],
             ['name' => 'Donald Knuth', 'bio' => 'Ilmuwan komputer; penulis The Art of Computer Programming.'],
             ['name' => 'Robert C. Martin', 'bio' => 'Penulis Clean Code; tokoh gerakan software craftsmanship.'],
-        ])->map(fn (array $data) => Author::query()->create($data));
+        ])->map(fn (array $data) => Author::query()->firstOrCreate(
+            ['name' => $data['name']],
+            ['bio' => $data['bio']],
+        ));
 
         $books = [
             [
@@ -272,21 +274,23 @@ class CatalogSeeder extends Seeder
             $dewey = $categoryMeta['dewey'];
             $callNumber = sprintf('%s.%d · %s', $dewey, ($index % 9) + 1, $book['suffix']);
 
-            Book::query()->create([
-                'title' => $book['title'],
-                'isbn' => $book['isbn'],
-                'author_id' => $authorByName[$book['author']]->id,
-                'category_id' => $categoryMeta['model']->id,
-                'cover_image_path' => null,
-                'file_path' => in_array($book['format'], ['digital', 'keduanya'], true)
-                    ? 'ebooks/'.Str::slug($book['title']).'.pdf'
-                    : null,
-                'format' => $book['format'],
-                'stock' => $book['stock'],
-                'synopsis' => $book['synopsis'],
-                'published_year' => $book['year'],
-                'call_number' => $callNumber,
-            ]);
+            Book::query()->updateOrCreate(
+                ['isbn' => $book['isbn']],
+                [
+                    'title' => $book['title'],
+                    'author_id' => $authorByName[$book['author']]->id,
+                    'category_id' => $categoryMeta['model']->id,
+                    'cover_image_path' => null,
+                    'file_path' => in_array($book['format'], ['digital', 'keduanya'], true)
+                        ? 'ebooks/'.Str::slug($book['title']).'.pdf'
+                        : null,
+                    'format' => $book['format'],
+                    'stock' => $book['stock'],
+                    'synopsis' => $book['synopsis'],
+                    'published_year' => $book['year'],
+                    'call_number' => $callNumber,
+                ],
+            );
         }
     }
 }

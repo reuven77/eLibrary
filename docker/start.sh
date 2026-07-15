@@ -12,6 +12,8 @@ test -f "$APP_HOME/server.php"
 
 php artisan storage:link --force
 php artisan migrate --force
+# Railway Postgres ≠ DB lokal; isi demo hanya jika masih kosong
+php artisan ruangbaca:seed-if-empty
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
