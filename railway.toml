@@ -1,0 +1,9 @@
+# Railway — RuangBaca (opsional jika dashboard memakai Config as Code)
+
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+# Pre-deploy dijalankan sebelum start; migrate juga ada di start nixpacks sebagai jaring pengaman.
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 3

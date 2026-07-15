@@ -8,4 +8,10 @@ export default defineConfig({
             refresh: true,
         }),
     ],
+    build: {
+        // Pastikan manifest.json selalu di-generate untuk @vite() di production.
+        outDir: 'public/build',
+        emptyOutDir: true,
+        manifest: 'manifest.json',
+    },
 });

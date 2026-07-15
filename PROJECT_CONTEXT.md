@@ -278,7 +278,16 @@ php artisan test
 | 2026-07-15 | Pengembalian (konfirmasi + denda); cover list katalog; identitas pinjam (HP, alamat, KTP); scheduler overdue |
 | 2026-07-15 | Fix layout kartu katalog (tinggi di `app.css`); kategori kiri / status kanan; sampul portrait full |
 | 2026-07-15 | Landing + auth dekoratif; motion ekstrem landing/katalog; tombol animatif; Alpine `revealOnScroll` |
+| 2026-07-15 | Fix Railway Vite assets: `vite.config.js` manifest, `nixpacks.toml` (npm ci+build), `RAILWAY-DEPLOY.md` |
 
 ---
 
-*Last updated: 2026-07-15 — sync handoff setelah polish motion & UI (landing, katalog, tombol, auth).*
+## 8. Deploy Railway (Vite assets)
+
+Lihat **`RAILWAY-DEPLOY.md`** dan **`nixpacks.toml`**.
+
+Ringkas: `public/build` di-gitignore → production **harus** `npm ci && npm run build` (jangan `--omit=dev`). `APP_URL` exact domain; **jangan** set `ASSET_URL`.
+
+---
+
+*Last updated: 2026-07-15 — fix Railway Vite assets (manifest, nixpacks, checklist).*
