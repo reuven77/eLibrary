@@ -68,6 +68,9 @@ RUN mkdir -p \
 
 ENV PORT=8000
 
-RUN chmod +x docker/start.sh
+# Safety net if dashboard still runs `artisan serve` with an unexpanded $PORT
+RUN php docker/patch-serve.php \
+    && chmod +x docker/start.sh
 
-CMD ["./docker/start.sh"]
+# Prefer start.sh; railway.toml startCommand forces this over dashboard leftovers
+CMD ["/bin/sh", "./docker/start.sh"]

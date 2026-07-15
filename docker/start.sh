@@ -11,5 +11,7 @@ php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 
+echo "RuangBaca: listening on 0.0.0.0:${PORT} (php -S, not artisan serve)"
+
 exec php -S "0.0.0.0:${PORT}" -t public \
     vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php

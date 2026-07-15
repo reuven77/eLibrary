@@ -17,13 +17,17 @@
 
 ## WAJIB di Railway Dashboard
 
-Settings → Build:
+Error `ServeCommand.php ... Unsupported operand types: string + int` artinya
+Railway masih menjalankan `php artisan serve` (Custom Start Command lama),
+bukan `docker/start.sh`.
+
+Settings → Build / Deploy:
 
 | Setting | Aksi |
 |---|---|
-| Builder | **Dockerfile** (atau biarkan Config as Code dari `railway.toml`) |
+| Builder | **Dockerfile** (Config as Code dari `railway.toml`) |
 | Custom Build Command | **KOSONGKAN / hapus** |
-| Custom Start Command | **KOSONGKAN / hapus** (pakai `CMD` di Dockerfile) |
+| Custom Start Command | **KOSONGKAN** atau set ke: `/bin/sh ./docker/start.sh` |
 
 Settings → Variables:
 
