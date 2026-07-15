@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Railway terminates TLS at the proxy; generated asset URLs must be https
+        // or the browser blocks CSS/JS as mixed content.
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }

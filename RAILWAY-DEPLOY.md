@@ -36,10 +36,13 @@ Settings → Variables:
 | `APP_KEY` | wajib |
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
-| `APP_URL` | `https://elibrary-production-fb6e.up.railway.app` (exact) |
+| `APP_URL` | **`https://…`** (bukan `http://`) — kalau `http`, CSS/JS diblokir mixed content |
 | `LOG_CHANNEL` | `stderr` |
 | `DATABASE_URL` / DB_* | dari plugin Postgres |
 | `ASSET_URL` | **jangan di-set** |
+
+Halaman putih tanpa style + teks tumpang tindih = CSS tidak masuk. Cek Network:
+asset harus `https://…/build/assets/….css` (bukan `http://`).
 
 Lalu **Redeploy**.
 
