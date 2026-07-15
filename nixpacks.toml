@@ -1,20 +1,18 @@
-# Nixpacks — RuangBaca (Laravel 13 + Vite + Tailwind) untuk Railway
-#
-# PENTING Vite production:
-# - public/build di-gitignore → WAJIB di-build di CI/Railway
-# - JANGAN `npm install --omit=dev` (Vite/Tailwind ada di devDependencies)
-# - JANGAN set ASSET_URL di Railway (biarkan kosong)
-# - APP_URL harus = domain production exact
+# Opsional / cadangan. Railway sekarang memakai Dockerfile via railway.toml.
+# Jika dashboard masih pakai Nixpacks, hapus Custom Build Command yang berisi:
+#   npm install --omit=dev
+# karena Vite ada di devDependencies.
 
-providers = ["php", "node"]
+providers = ["php"]
 
 [variables]
 NIXPACKS_PHP_VERSION = "8.4"
-NIXPACKS_NODE_VERSION = "22"
 
 [phases.setup]
 nixPkgs = [
   "...",
+  "nodejs_22",
+  "npm-9_x",
   "php84Extensions.bcmath",
   "php84Extensions.gd",
   "php84Extensions.intl",
@@ -41,6 +39,5 @@ cmds = [
   "chmod -R ug+rwx storage bootstrap/cache",
 ]
 
-# Pre-start ops (migrate + cache) digabung di start agar env Railway sudah ter-inject.
 [start]
 cmd = "php artisan storage:link --force && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"

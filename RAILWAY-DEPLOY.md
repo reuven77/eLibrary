@@ -1,75 +1,53 @@
-# Railway Deploy — Vite Assets Checklist (RuangBaca)
+# Railway Deploy — RuangBaca
 
-## Root cause (paling sering)
+## Penyebab build gagal (dari log terakhir)
 
-`public/build` **di-gitignore**. Production hanya punya CSS/JS jika Railway menjalankan `npm run build` sukses.  
-Perintah **`npm install --omit=dev` salah** untuk proyek ini: Vite & Tailwind ada di `devDependencies`, jadi build bisa gagal / tanpa assets.
+1. **Custom Build Command di Railway** menimpa nixpacks:
+   `composer install ... && npm install --omit=dev && npm run build`  
+   → Vite/Tailwind di `devDependencies` jadi hilang / build rusak.
+2. **Konflik Nixpacks Node**: `providers = ["php","node"]` + `nodejs_22` dobel →
+   `Unable to build profile... conflict ... nodejs-22.12.0` vs `nodejs-22.11.0`.
 
-## Yang sudah diperbaiki di repo
+## Perbaikan di repo
 
-| File | Perubahan |
+- **`Dockerfile`** multi-stage (Node 22 build Vite → PHP 8.4 runtime)
+- **`railway.toml`** → `builder = "DOCKERFILE"`
+- **`.dockerignore`** agar image ramping
+- `nixpacks.toml` disederhanakan (cadangan saja)
+
+## WAJIB di Railway Dashboard
+
+Settings → Build:
+
+| Setting | Aksi |
 |---|---|
-| `vite.config.js` | `outDir: public/build` + `manifest: 'manifest.json'` |
-| `nixpacks.toml` | `npm ci` → `npm run build` → assert `manifest.json` + PHP 8.4 extensions |
-| `railway.toml` | builder NIXPACKS |
-| Layouts Blade | sudah memakai `@vite([...])` (ruangbaca-layout, guest, app) |
-| `.env.example` | catatan production Railway + larangan `ASSET_URL` |
+| Builder | **Dockerfile** (atau biarkan Config as Code dari `railway.toml`) |
+| Custom Build Command | **KOSONGKAN / hapus** |
+| Custom Start Command | **KOSONGKAN / hapus** (pakai `CMD` di Dockerfile) |
 
-## Railway Variables (wajib)
+Settings → Variables:
 
 | Variable | Nilai |
 |---|---|
-| `APP_KEY` | dari `php artisan key:generate --show` |
+| `APP_KEY` | wajib |
 | `APP_ENV` | `production` |
 | `APP_DEBUG` | `false` |
-| `APP_URL` | `https://elibrary-production-fb6e.up.railway.app` (exact domain) |
+| `APP_URL` | `https://elibrary-production-fb6e.up.railway.app` (exact) |
 | `LOG_CHANNEL` | `stderr` |
-| `DB_*` / `DATABASE_URL` | dari plugin Postgres (`${{Postgres.DATABASE_URL}}`) |
-| `SESSION_DRIVER` | `file` (atau `database` bila disiapkan) |
-| `CACHE_STORE` | `file` |
-| `QUEUE_CONNECTION` | `sync` |
+| `DATABASE_URL` / DB_* | dari plugin Postgres |
 | `ASSET_URL` | **jangan di-set** |
 
-## Build / Start
+Lalu **Redeploy**.
 
-Build diatur di **`nixpacks.toml`** (bukan custom Build Command yang `omit=dev`).
+## Verifikasi setelah sukses
 
-Jika mengisi Manual Build Command di dashboard, pakai ini:
+1. `https://…/build/manifest.json` → JSON 200
+2. Hard refresh → CSS/JS 200 di Network tab
+3. Log start: migrate + `artisan serve` jalan
 
-```bash
-composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader && npm ci && npm run build && test -f public/build/manifest.json
-```
-
-Pre-Deploy / Start (sudah di `nixpacks.toml` start):
+## Local (opsional)
 
 ```bash
-php artisan storage:link --force && php artisan migrate --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=$PORT
+docker build -t ruangbaca .
+docker run --rm -p 8000:8000 --env-file .env ruangbaca
 ```
-
-## Local verify
-
-```bash
-npm ci
-npm run build
-# Windows PowerShell:
-Test-Path public\build\manifest.json
-Get-Content public\build\manifest.json
-```
-
-## Deploy checklist
-
-- [ ] `npm run build` lokal sukses; `public/build/manifest.json` ada
-- [ ] `vite.config.js` punya manifest + outDir
-- [ ] Layout utama punya `@vite(...)`
-- [ ] `nixpacks.toml` tidak memakai `--omit=dev`
-- [ ] Railway `APP_URL` = domain production exact
-- [ ] Railway **tidak** set `ASSET_URL`
-- [ ] Push + redeploy; tunggu sukses
-- [ ] Buka `/build/manifest.json` → 200 JSON
-- [ ] DevTools Network: CSS/JS 200; hard refresh
-
-## Debug cepat
-
-1. `https://elibrary-production-fb6e.up.railway.app/build/manifest.json` → 404? Build gagal / file tidak masuk image.
-2. HTML mengarah ke `http://127.0.0.1:5173`? Ada file `public/hot` di image — hapus hot, jangan deploy file hot.
-3. CSS 404 path aneh domain? Cek `APP_URL` vs domain aktual.
