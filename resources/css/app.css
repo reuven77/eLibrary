@@ -1,0 +1,587 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-onionskin text-charcoal font-sans antialiased;
+        background-image:
+            radial-gradient(rgba(36, 33, 28, 0.035) 0.7px, transparent 0.7px),
+            linear-gradient(180deg, #eceae2 0%, #e8e5db 100%);
+        background-size: 4px 4px, 100% 100%;
+    }
+
+    :focus-visible {
+        @apply outline-none ring-2 ring-brass ring-offset-2 ring-offset-onionskin;
+    }
+
+    ::selection {
+        @apply bg-brass/30 text-charcoal;
+    }
+
+    [x-cloak] {
+        display: none !important;
+    }
+}
+
+@layer components {
+    .rb-container {
+        @apply mx-auto w-full max-w-shelf px-4 sm:px-6 lg:px-8;
+    }
+
+    .rb-eyebrow {
+        @apply font-mono text-utility uppercase tracking-[0.02em] text-charcoal-muted;
+    }
+
+    .rb-display {
+        @apply font-display text-display-sm sm:text-display-md lg:text-display italic text-navy;
+    }
+
+    /* —— Tombol animatif —— */
+    .rb-btn {
+        @apply relative inline-flex items-center justify-center gap-2 overflow-hidden px-5 py-2.5 text-sm font-medium;
+        transition:
+            transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1),
+            box-shadow 0.22s ease,
+            background-color 0.2s ease,
+            border-color 0.2s ease,
+            color 0.2s ease;
+        transform: translateY(0) scale(1);
+        will-change: transform;
+    }
+
+    .rb-btn::after {
+        content: '';
+        @apply pointer-events-none absolute inset-0 -translate-x-full;
+        background: linear-gradient(
+            110deg,
+            transparent 25%,
+            rgba(255, 255, 255, 0.28) 45%,
+            transparent 65%
+        );
+        transition: transform 0.55s ease;
+    }
+
+    .rb-btn:hover {
+        transform: translateY(-3px) scale(1.04);
+    }
+
+    .rb-btn:hover::after {
+        transform: translateX(100%);
+    }
+
+    .rb-btn:active {
+        transform: translateY(1px) scale(0.96);
+        transition-duration: 0.08s;
+    }
+
+    .rb-btn-primary {
+        @apply rb-btn bg-navy text-onionskin shadow-md shadow-navy/20;
+    }
+
+    .rb-btn-primary:hover {
+        @apply bg-navy-soft shadow-lg shadow-navy/30;
+    }
+
+    .rb-btn-ghost {
+        @apply rb-btn border border-navy/25 text-navy;
+    }
+
+    .rb-btn-ghost:hover {
+        @apply border-brass text-navy;
+        box-shadow: 0 8px 20px rgba(176, 141, 87, 0.18);
+    }
+
+    button:not([class*='rb-btn']):not([disabled]),
+    input[type='submit']:not([disabled]),
+    a.rb-btn {
+        cursor: pointer;
+    }
+
+    /* Generik: semua tombol biasa + submit ikut bounce ringan */
+    button[type='submit'],
+    button.bg-forest,
+    button.bg-rust,
+    button.bg-navy,
+    a.bg-forest,
+    a.bg-rust {
+        transition:
+            transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+            box-shadow 0.2s ease,
+            filter 0.2s ease,
+            background-color 0.2s ease;
+    }
+
+    button[type='submit']:hover,
+    button.bg-forest:hover,
+    button.bg-rust:hover,
+    button.bg-navy:hover {
+        transform: translateY(-2px) scale(1.03);
+        filter: brightness(1.06);
+    }
+
+    button[type='submit']:active,
+    button.bg-forest:active,
+    button.bg-rust:active,
+    button.bg-navy:active {
+        transform: translateY(1px) scale(0.96);
+    }
+
+    .rb-flash-success {
+        @apply border border-forest/30 bg-forest/10 px-4 py-3 text-forest;
+    }
+
+    .rb-flash-error {
+        @apply border border-rust/30 bg-rust/10 px-4 py-3 text-rust;
+    }
+
+    /* Signature: kartu katalog digital — sampul portrait dominan */
+    .catalog-card {
+        perspective: 1200px;
+        height: 28rem;
+        opacity: 0;
+        transform: translateY(40px) scale(0.92) rotateX(8deg);
+        transition:
+            opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+            transform 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+            box-shadow 0.35s ease;
+        transition-delay: calc(var(--stagger, 0) * 70ms);
+        transform-style: preserve-3d;
+    }
+
+    .catalog-card.is-visible {
+        opacity: 1;
+        transform: translateY(0) scale(1) rotateX(0);
+    }
+
+    .catalog-card.is-visible:hover {
+        transform: translateY(-10px) scale(1.03);
+        box-shadow: 0 18px 40px rgba(30, 42, 71, 0.18);
+        z-index: 2;
+    }
+
+    .catalog-card.is-visible:hover .catalog-card-cover img {
+        transform: scale(1.12);
+    }
+
+    .catalog-card.is-visible:hover .catalog-card-status {
+        animation: rb-stamp-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .catalog-card-inner {
+        @apply relative h-full w-full transition-transform duration-500;
+        transform-style: preserve-3d;
+    }
+
+    .catalog-card.is-flipped .catalog-card-inner {
+        transform: rotateY(180deg);
+    }
+
+    .catalog-card-face {
+        @apply absolute inset-0 flex flex-col bg-white/90 p-4;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+        border: 1px solid rgba(30, 42, 71, 0.12);
+        box-shadow: 0 1px 0 rgba(36, 33, 28, 0.04);
+    }
+
+    .catalog-card-face::before {
+        content: '';
+        @apply absolute left-3 right-3 top-0 z-10 border-t border-dashed border-navy/25;
+    }
+
+    .catalog-card-face.is-front {
+        @apply p-0;
+    }
+
+    .catalog-card-face.is-front::before {
+        display: none;
+    }
+
+    .catalog-card-cover {
+        @apply relative min-h-0 flex-1 overflow-hidden bg-navy;
+    }
+
+    .catalog-card-cover img {
+        @apply h-full w-full object-cover object-center;
+        transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .catalog-card-cover-fallback {
+        @apply flex h-full flex-col items-start justify-end p-5 text-left;
+        background:
+            linear-gradient(160deg, rgba(30, 42, 71, 0.92), rgba(30, 42, 71, 1)),
+            repeating-linear-gradient(
+                -12deg,
+                transparent,
+                transparent 10px,
+                rgba(201, 162, 39, 0.06) 10px,
+                rgba(201, 162, 39, 0.06) 11px
+            );
+    }
+
+    .catalog-card-overlays {
+        @apply pointer-events-none absolute inset-x-0 top-0 z-10 flex items-start justify-between gap-2 p-2.5;
+    }
+
+    .catalog-card-category {
+        @apply max-w-[45%] truncate bg-onionskin/95 px-2 py-1 font-mono text-[10px] font-medium uppercase tracking-[0.08em] text-navy shadow-sm;
+    }
+
+    .catalog-card-status {
+        @apply bg-onionskin/95 shadow-sm;
+        font-size: 10px !important;
+        padding: 0.2rem 0.55rem !important;
+    }
+
+    .catalog-card-body {
+        @apply flex shrink-0 flex-col border-t border-navy/10 bg-white/95 p-3;
+        min-height: 6.25rem;
+    }
+
+    .catalog-card-back {
+        transform: rotateY(180deg);
+    }
+
+    .catalog-card-static {
+        @apply relative flex h-full flex-col border border-navy/15 bg-white/90 p-4 shadow-card;
+    }
+
+    .catalog-card-static::before {
+        content: '';
+        @apply absolute left-3 right-3 top-0 border-t border-dashed border-navy/25;
+    }
+
+    /* —— Landing ekstrem —— */
+    .rb-hero {
+        @apply relative overflow-hidden bg-navy text-onionskin;
+        background-image:
+            radial-gradient(ellipse 80% 60% at 85% 20%, rgba(176, 141, 87, 0.22), transparent 55%),
+            radial-gradient(ellipse 50% 40% at 10% 90%, rgba(63, 93, 78, 0.28), transparent 50%),
+            linear-gradient(145deg, #1e2a47 0%, #243356 48%, #1a243d 100%);
+        animation: rb-hero-shift 14s ease-in-out infinite alternate;
+    }
+
+    .rb-hero-grid {
+        @apply pointer-events-none absolute inset-0 opacity-[0.14];
+        background-image:
+            linear-gradient(rgba(236, 234, 226, 0.35) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(236, 234, 226, 0.35) 1px, transparent 1px);
+        background-size: 48px 48px;
+        mask-image: linear-gradient(180deg, black 40%, transparent 95%);
+        animation: rb-grid-drift 18s linear infinite;
+    }
+
+    .rb-hero-glow {
+        @apply pointer-events-none absolute -right-20 top-10 h-72 w-72 rounded-full;
+        background: radial-gradient(circle, rgba(176, 141, 87, 0.35), transparent 70%);
+        animation: rb-glow-orbit 10s ease-in-out infinite;
+        filter: blur(8px);
+    }
+
+    .rb-hero-glow-2 {
+        @apply pointer-events-none absolute -left-16 bottom-0 h-64 w-64 rounded-full;
+        background: radial-gradient(circle, rgba(63, 93, 78, 0.4), transparent 70%);
+        animation: rb-glow-orbit 12s ease-in-out 1.5s infinite reverse;
+        filter: blur(10px);
+    }
+
+    .rb-brand-impact {
+        display: inline-block;
+        background: linear-gradient(
+            100deg,
+            #eceae2 0%,
+            #b08d57 35%,
+            #eceae2 55%,
+            #eceae2 100%
+        );
+        background-size: 220% auto;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: rb-brand-shimmer 4s ease-in-out infinite;
+    }
+
+    .rb-reveal {
+        opacity: 0;
+        transform: translateY(2.5rem) scale(0.94);
+        filter: blur(6px);
+        animation: rb-reveal-up 0.95s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    .rb-reveal-delay-1 { animation-delay: 0.1s; }
+    .rb-reveal-delay-2 { animation-delay: 0.22s; }
+    .rb-reveal-delay-3 { animation-delay: 0.36s; }
+    .rb-reveal-delay-4 { animation-delay: 0.5s; }
+    .rb-reveal-delay-5 { animation-delay: 0.68s; }
+
+    .rb-section-in {
+        opacity: 0;
+        transform: translateY(48px);
+        transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .rb-section-in.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .rb-float {
+        animation: rb-float-y 3.2s ease-in-out infinite;
+    }
+
+    .rb-float-delay {
+        animation: rb-float-y 3.8s ease-in-out 0.5s infinite;
+    }
+
+    .rb-spine.rb-float,
+    .rb-spine.rb-float-delay {
+        animation-name: rb-float-spine-wild;
+    }
+
+    .rb-spine.rb-float-delay {
+        animation-duration: 3.8s;
+        animation-delay: 0.55s;
+    }
+
+    .rb-stamp-drift {
+        animation: rb-stamp-wild 3.5s ease-in-out infinite;
+    }
+
+    .rb-spine-stack {
+        @apply relative mx-auto h-[22rem] w-full max-w-md;
+        animation: rb-stack-sway 8s ease-in-out infinite;
+    }
+
+    .rb-spine {
+        @apply absolute overflow-hidden border border-onionskin/15 shadow-lg;
+        width: 4.25rem;
+        height: 16rem;
+        transform-origin: bottom center;
+        background: linear-gradient(90deg, rgba(0, 0, 0, 0.18), transparent 35%, transparent 65%, rgba(255, 255, 255, 0.08));
+        transition: filter 0.3s ease;
+    }
+
+    .rb-spine:hover {
+        filter: brightness(1.15);
+    }
+
+    .rb-spine span {
+        @apply absolute inset-y-6 left-1/2 w-[11rem] origin-left -translate-x-1/2 rotate-90 truncate font-mono text-[11px] uppercase tracking-[0.14em] text-onionskin/90;
+        writing-mode: horizontal-tb;
+    }
+
+    .rb-counter {
+        animation: rb-count-pop 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) 0.9s both;
+    }
+
+    .rb-shelf-chip {
+        transition:
+            transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+            border-color 0.2s ease,
+            box-shadow 0.25s ease;
+    }
+
+    .rb-shelf-chip:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 0 10px 24px rgba(30, 42, 71, 0.12);
+    }
+
+    .rb-auth-shell {
+        @apply relative min-h-screen overflow-hidden bg-onionskin;
+    }
+
+    .rb-auth-panel {
+        @apply relative hidden overflow-hidden bg-navy text-onionskin lg:flex lg:flex-col lg:justify-between;
+        background-image:
+            radial-gradient(ellipse 70% 50% at 20% 20%, rgba(176, 141, 87, 0.2), transparent 60%),
+            linear-gradient(160deg, #1e2a47, #243356 55%, #1a243d);
+    }
+
+    .rb-auth-orb {
+        @apply absolute rounded-full border border-brass/25;
+        animation: rb-orb-pulse 5s ease-in-out infinite;
+    }
+
+    .rb-auth-card {
+        @apply relative w-full max-w-md border border-navy/15 bg-white/85 p-7 shadow-card backdrop-blur-sm;
+        animation: rb-reveal-up 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .rb-auth-card::before {
+        content: '';
+        @apply absolute left-4 right-4 top-0 border-t border-dashed border-navy/25;
+    }
+
+    .rb-catalog-banner {
+        @apply relative overflow-hidden border border-navy/10 bg-navy px-5 py-6 text-onionskin;
+        background-image:
+            radial-gradient(ellipse 60% 80% at 90% 50%, rgba(176, 141, 87, 0.25), transparent 55%),
+            linear-gradient(120deg, #1e2a47, #2a3a5c);
+    }
+
+    .rb-catalog-banner::after {
+        content: '';
+        @apply pointer-events-none absolute inset-0 opacity-20;
+        background-image: repeating-linear-gradient(
+            -18deg,
+            transparent,
+            transparent 12px,
+            rgba(236, 234, 226, 0.12) 12px,
+            rgba(236, 234, 226, 0.12) 13px
+        );
+        animation: rb-grid-drift 22s linear infinite;
+    }
+}
+
+@keyframes rb-reveal-up {
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes rb-float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-18px); }
+}
+
+@keyframes rb-float-spine-wild {
+    0%, 100% {
+        translate: 0 0;
+        rotate: 0deg;
+    }
+    33% {
+        translate: 0 -18px;
+        rotate: 1.5deg;
+    }
+    66% {
+        translate: 4px -8px;
+        rotate: -1.5deg;
+    }
+}
+
+@keyframes rb-stamp-wild {
+    0%, 100% {
+        transform: rotate(-8deg) translateY(0) scale(1);
+    }
+    40% {
+        transform: rotate(4deg) translateY(-14px) scale(1.08);
+    }
+    70% {
+        transform: rotate(-12deg) translateY(-4px) scale(0.96);
+    }
+}
+
+@keyframes rb-stamp-pop {
+    0% { transform: scale(0.7) rotate(-12deg); }
+    100% { transform: scale(1) rotate(-4deg); }
+}
+
+@keyframes rb-orb-pulse {
+    0%, 100% { transform: scale(1); opacity: 0.45; }
+    50% { transform: scale(1.18); opacity: 0.85; }
+}
+
+@keyframes rb-hero-shift {
+    0% {
+        background-position: 0% 40%, 100% 80%, 0 0;
+    }
+    100% {
+        background-position: 30% 60%, 70% 40%, 0 0;
+    }
+}
+
+@keyframes rb-grid-drift {
+    from { transform: translate3d(0, 0, 0); }
+    to { transform: translate3d(48px, 48px, 0); }
+}
+
+@keyframes rb-glow-orbit {
+    0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.55; }
+    50% { transform: translate(-40px, 30px) scale(1.25); opacity: 0.9; }
+}
+
+@keyframes rb-brand-shimmer {
+    0%, 100% { background-position: 100% center; }
+    50% { background-position: 0% center; }
+}
+
+@keyframes rb-stack-sway {
+    0%, 100% { transform: rotate(-1deg) translateX(0); }
+    50% { transform: rotate(1.5deg) translateX(6px); }
+}
+
+@keyframes rb-count-pop {
+    from {
+        opacity: 0;
+        transform: scale(0.6) translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rb-reveal,
+    .rb-reveal-delay-1,
+    .rb-reveal-delay-2,
+    .rb-reveal-delay-3,
+    .rb-reveal-delay-4,
+    .rb-reveal-delay-5,
+    .rb-auth-card,
+    .rb-counter,
+    .catalog-card,
+    .rb-section-in {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+        animation: none !important;
+        transition: none !important;
+    }
+
+    .catalog-card.is-visible {
+        opacity: 1 !important;
+        transform: none !important;
+    }
+
+    .rb-float,
+    .rb-float-delay,
+    .rb-stamp-drift,
+    .rb-auth-orb,
+    .rb-hero,
+    .rb-hero-grid,
+    .rb-hero-glow,
+    .rb-hero-glow-2,
+    .rb-brand-impact,
+    .rb-spine-stack,
+    .rb-catalog-banner::after {
+        animation: none !important;
+    }
+
+    .rb-btn:hover,
+    .rb-btn:active,
+    .catalog-card:hover,
+    button[type='submit']:hover,
+    button[type='submit']:active {
+        transform: none !important;
+    }
+
+    .rb-btn::after {
+        display: none;
+    }
+
+    .catalog-card-inner {
+        transition: none !important;
+    }
+
+    .catalog-card.is-flipped .catalog-card-inner {
+        transform: none !important;
+    }
+}
