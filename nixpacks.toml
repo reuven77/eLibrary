@@ -3,14 +3,17 @@
 nixPkgs = ["php84", "nodejs_20"]
 
 [phases.build]
-# Urutan build yang aman untuk Laravel + Vite
+# 1. Setup limit upload PHP
+# 2. Install dependencies
+# 3. Build frontend
 cmds = [
+  "mkdir -p /usr/local/etc/php/conf.d",
+  "cp php.ini /usr/local/etc/php/conf.d/uploads.ini",
   "composer install --no-dev --optimize-autoloader",
   "npm ci",
   "npm run build"
 ]
 
 [start]
-# Menggunakan script start.sh yang sudah kita buat sebelumnya 
-# untuk menghindari error "string + int" pada PORT di PHP 8.4
+# Menggunakan script start.sh untuk menghindari error PORT di PHP 8.4
 cmd = "sh docker/start.sh"
