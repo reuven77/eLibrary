@@ -54,6 +54,9 @@ RUN composer install \
 COPY . .
 COPY --from=frontend /app/public/build ./public/build
 
+# Copy custom PHP configuration
+COPY docker/php.ini /usr/local/etc/php/conf.d/custom.ini
+
 RUN mkdir -p \
         storage/framework/cache \
         storage/framework/sessions \
@@ -75,3 +78,4 @@ RUN php docker/patch-serve.php \
 
 # Prefer start.sh; railway.toml startCommand forces this over dashboard leftovers
 CMD ["/bin/sh", "./docker/start.sh"]
+
