@@ -1,43 +1,16 @@
-# Opsional / cadangan. Railway sekarang memakai Dockerfile via railway.toml.
-# Jika dashboard masih pakai Nixpacks, hapus Custom Build Command yang berisi:
-#   npm install --omit=dev
-# karena Vite ada di devDependencies.
-
-providers = ["php"]
-
-[variables]
-NIXPACKS_PHP_VERSION = "8.4"
-
 [phases.setup]
-nixPkgs = [
-  "...",
-  "nodejs_22",
-  "npm-9_x",
-  "php84Extensions.bcmath",
-  "php84Extensions.gd",
-  "php84Extensions.intl",
-  "php84Extensions.mbstring",
-  "php84Extensions.pdo",
-  "php84Extensions.pgsql",
-  "php84Extensions.tokenizer",
-  "php84Extensions.xml",
-  "php84Extensions.zip",
-]
-
-[phases.install]
-cmds = [
-  "composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader",
-  "npm ci",
-]
+# Paksa Railway menggunakan PHP 8.4 dan Node 20
+nixPkgs = ["php84", "nodejs_20"]
 
 [phases.build]
+# Urutan build yang aman untuk Laravel + Vite
 cmds = [
-  "npm run build",
-  "test -f public/build/manifest.json",
-  "rm -rf node_modules",
-  "mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache storage/app/public",
-  "chmod -R ug+rwx storage bootstrap/cache",
+  "composer install --no-dev --optimize-autoloader",
+  "npm ci",
+  "npm run build"
 ]
 
 [start]
-cmd = "/bin/sh ./docker/start.sh"
+# Menggunakan script start.sh yang sudah kita buat sebelumnya 
+# untuk menghindari error "string + int" pada PORT di PHP 8.4
+cmd = "sh docker/start.sh"
